@@ -6,10 +6,18 @@
     xmlns:local="clr-namespace:ModbusApp"
     Shell.FlyoutBehavior="Flyout"
     Title="ModbusApp">
+    
+    <ShellContent
+        Title="Client"
+        ContentTemplate="{DataTemplate local:ClientPage}"
+        Route="ClientPage" />
 
     <ShellContent
         Title="Home"
         ContentTemplate="{DataTemplate local:MainPage}"
         Route="MainPage" />
+    
 
+    
+    
 </Shell>

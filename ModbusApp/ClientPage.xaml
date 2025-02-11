@@ -1,0 +1,131 @@
+<ContentPage xmlns="http://schemas.microsoft.com/dotnet/2021/maui"
+             xmlns:x="http://schemas.microsoft.com/winfx/2009/xaml"
+             x:Class="ModbusApp.ClientPage">
+    <Grid RowDefinitions="Auto, Auto, Auto, Auto, Auto, *"
+          ColumnDefinitions="*"
+          Padding="10">
+
+        <!-- Wewnętrzny Grid w pierwszym wierszu -->
+        <Grid Grid.Row="0"
+              ColumnDefinitions="0.3*, *, *, *, *, 0.3*"
+              ColumnSpacing="5"
+              Padding="5"
+              HorizontalOptions="FillAndExpand"
+              VerticalOptions="Start">
+
+
+            <!-- Connection Type Picker (TCP/RTU) -->
+            <Picker Grid.Column="0"
+                    x:Name="ConnectionPicker"
+                    HorizontalOptions="FillAndExpand"
+                    SelectedItem="TCP">
+                <Picker.Items>
+                    <x:String>TCP</x:String>
+                </Picker.Items>
+            </Picker>
+
+            <!-- IP Address Entry -->
+            <Entry Grid.Column="1" x:Name="IpEntry" Placeholder="Enter IP Address"
+                   HorizontalOptions="FillAndExpand" />
+
+            <!-- Port Entry -->
+            <Entry Grid.Column="2" x:Name="PortEntry" Placeholder="Enter Port" Keyboard="Numeric"
+                   HorizontalOptions="FillAndExpand" />
+
+            <!-- Connect Button -->
+            <Button Grid.Column="3" Text="Connect"
+                    HorizontalOptions="FillAndExpand" />
+
+            <!-- Status Label -->
+            <Label Grid.Column="4" x:Name="StatusLabel" Text="Disconnected" TextColor="Red"
+                   HorizontalOptions="FillAndExpand" VerticalOptions="Center" HorizontalTextAlignment="Center" />
+
+            <Picker Grid.Column="5"
+                    x:Name="AliasLenghtPicker"
+                    HorizontalOptions="Fill">
+                <Picker.Items>
+                    <x:String>5-digits</x:String>
+                    <x:String>6-digits</x:String>
+                </Picker.Items>
+            </Picker>
+
+        </Grid>
+
+        <Grid Grid.Row="1"
+              ColumnDefinitions="*"
+              HorizontalOptions="Fill"
+              VerticalOptions="Fill">
+
+            <Label Text="Write Values"
+                   HorizontalOptions="Center"
+                   VerticalOptions="Center"
+                   FontSize="24" />
+
+        </Grid>
+
+        <Grid Grid.Row="2"
+              ColumnDefinitions="*, *, *, *, *"
+              ColumnSpacing="5"
+              Padding="5"
+              HorizontalOptions="Fill"
+              VerticalOptions="Start">
+
+            <Label Grid.Column="0"
+                   Text="Bool"
+                   VerticalOptions="Center"
+                   HorizontalOptions="Start" />
+
+            <Entry Grid.Column="1"
+                   x:Name="BoolAliasEntry"
+                   Placeholder="Alias" />
+
+            <CheckBox Grid.Column="2"
+                      IsChecked="False"
+                      x:Name="BoolWriteCheckBox" />
+
+            <Button Grid.Column="3"
+                    Text="Write"
+                    x:Name="BoolWriteButton" />
+
+            <BoxView Grid.Column="4"
+                     x:Name="BoolWriteFeedbackBoxView"
+                     CornerRadius="3"
+                     WidthRequest="35"
+                     HeightRequest="35"
+                     BackgroundColor="Transparent"
+                     Color="Red" />
+        </Grid>
+
+        <Grid Grid.Row="3"
+              ColumnDefinitions="*, *, *, *, *"
+              ColumnSpacing="5"
+              Padding="5"
+              HorizontalOptions="Fill"
+              VerticalOptions="Start">
+
+            <Label Grid.Column="0"
+                   Text="Integers"
+                   VerticalOptions="Center"
+                   HorizontalOptions="Start" />
+
+            <Entry Grid.Column="1"
+                   x:Name="IntegersAliasEntry"
+                   Placeholder="Alias" />
+
+            <Entry Grid.Column="2"
+                   x:Name="IntegersWriteEntry" />
+
+            <Button Grid.Column="3"
+                    Text="Write"
+                    x:Name="IntegersWriteButton" />
+
+            <Border Grid.Column="4">
+                <Label Text="Feedback Value"
+                       x:Name="IntegersWriteFeedbackLabel" 
+                       VerticalOptions="Center"
+                       HorizontalOptions="Center"/>
+            </Border>
+        </Grid>
+
+    </Grid>
+</ContentPage>

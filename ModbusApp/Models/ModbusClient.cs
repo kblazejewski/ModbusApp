@@ -17,38 +17,38 @@ public class ModbusClient
         await Task.Run(() => _modbusClient.Disconnect());
     }
 
-    public async Task<ushort[]> ReadHoldingRegistersAsync(byte unitIdentifier, int startingAdress, int count)
+    public async Task<ushort[]> ReadHoldingRegistersAsync(byte unitIdentifier, int startingAddress, int count)
     {
         return await Task.Run(() =>
         {
-            var spanData = _modbusClient.ReadHoldingRegisters<ushort>(unitIdentifier, startingAdress, count);
+            var spanData = _modbusClient.ReadHoldingRegisters<ushort>(unitIdentifier, startingAddress, count);
             return spanData.ToArray();
         });
     }
 
-    public async Task<ushort[]> ReadUnsignedIntegersAsync(byte unitIdentifier, int startingAdress, int count)
+    public async Task<ushort[]> ReadUnsignedIntegersAsync(byte unitIdentifier, int startingAddress, int count)
     {
         return await Task.Run(() =>
         {
-            var spanData = _modbusClient.ReadHoldingRegisters<ushort>(unitIdentifier, startingAdress, count);
+            var spanData = _modbusClient.ReadHoldingRegisters<ushort>(unitIdentifier, startingAddress, count);
             return spanData.ToArray();
         });
     }
 
-    public async Task<short[]> ReadSignedIntegersAsync(byte unitIdentifier, int startingAdress, int count)
+    public async Task<short[]> ReadSignedIntegersAsync(byte unitIdentifier, int startingAddress, int count)
     {
         return await Task.Run(() =>
         {
-            var spanData = _modbusClient.ReadHoldingRegisters<short>(unitIdentifier, startingAdress, count);
+            var spanData = _modbusClient.ReadHoldingRegisters<short>(unitIdentifier, startingAddress, count);
             return spanData.ToArray();
         });
     }
 
-    public async Task<float[]> ReadFloatsAsync(byte unitIdentifier, int startingAdress, int count)
+    public async Task<float[]> ReadFloatsAsync(byte unitIdentifier, int startingAddress, int count)
     {
         return await Task.Run(() =>
         {
-            var spanData = _modbusClient.ReadHoldingRegisters<float>(unitIdentifier, startingAdress, count);
+            var spanData = _modbusClient.ReadHoldingRegisters<float>(unitIdentifier, startingAddress, count);
             return spanData.ToArray();
         });
     }
@@ -63,14 +63,14 @@ public class ModbusClient
         });
     }
 
-    public async Task WriteIntegerAsync(byte unitIdentifier, int startingAdress, short value)
+    public async Task WriteIntegerAsync(byte unitIdentifier, int startingAddress, short value)
     {
-        await Task.Run(() => _modbusClient.WriteSingleRegister(unitIdentifier, startingAdress, value));
+        await Task.Run(() => _modbusClient.WriteSingleRegister(unitIdentifier, startingAddress, value));
     }
 
-    public async Task WriteMultipleIntegersAsync(byte unitIdentifier, int startingAdress, short[] values)
+    public async Task WriteMultipleIntegersAsync(byte unitIdentifier, int startingAddress, short[] values)
     {
-        await Task.Run(() => _modbusClient.WriteMultipleRegisters(unitIdentifier, startingAdress, values));
+        await Task.Run(() => _modbusClient.WriteMultipleRegisters(unitIdentifier, startingAddress, values));
     }
 
     public async Task WriteFloatAsync(byte unitIdentifier, int startingAddress, float value)
