@@ -1,11 +1,16 @@
 <ContentPage xmlns="http://schemas.microsoft.com/dotnet/2021/maui"
              xmlns:x="http://schemas.microsoft.com/winfx/2009/xaml"
+             xmlns:vm="clr-namespace:ModbusApp.ViewModels"
              x:Class="ModbusApp.ClientPage">
+    
+    <ContentPage.BindingContext>
+        <vm:ClientViewModel />
+    </ContentPage.BindingContext>
+    
     <Grid RowDefinitions="Auto, Auto, Auto, Auto, Auto, *"
           ColumnDefinitions="*"
           Padding="10">
-
-        <!-- Wewnętrzny Grid w pierwszym wierszu -->
+        
         <Grid Grid.Row="0"
               ColumnDefinitions="0.3*, *, *, *, *, 0.3*"
               ColumnSpacing="5"
@@ -25,20 +30,34 @@
             </Picker>
 
             <!-- IP Address Entry -->
-            <Entry Grid.Column="1" x:Name="IpEntry" Placeholder="Enter IP Address"
+            <Entry Grid.Column="1" 
+                   x:Name="IpEntry"
+                   Text="{Binding IpAddress}"
+                   Placeholder="Enter IP Address"
                    HorizontalOptions="FillAndExpand" />
 
             <!-- Port Entry -->
-            <Entry Grid.Column="2" x:Name="PortEntry" Placeholder="Enter Port" Keyboard="Numeric"
-                   HorizontalOptions="FillAndExpand" />
+            <Entry Grid.Column="2"
+                   x:Name="PortEntry" 
+                   Text="{Binding Port}"
+                   Placeholder="Enter Port" 
+                   Keyboard="Numeric"
+                   HorizontalOptions="Fill" />
 
             <!-- Connect Button -->
-            <Button Grid.Column="3" Text="Connect"
-                    HorizontalOptions="FillAndExpand" />
+            <Button Grid.Column="3" 
+                    Text="Connect"
+                    Command="{Binding ConnectCommand}"
+                    HorizontalOptions="Fill" />
 
             <!-- Status Label -->
-            <Label Grid.Column="4" x:Name="StatusLabel" Text="Disconnected" TextColor="Red"
-                   HorizontalOptions="FillAndExpand" VerticalOptions="Center" HorizontalTextAlignment="Center" />
+            <Label Grid.Column="4" 
+                   x:Name="StatusLabel" 
+                   Text="{Binding ConnectionStatus}"
+                   TextColor="Red"
+                   HorizontalOptions="Fill" 
+                   VerticalOptions="Center" 
+                   HorizontalTextAlignment="Center" />
 
             <Picker Grid.Column="5"
                     x:Name="AliasLenghtPicker"
@@ -77,15 +96,17 @@
 
             <Entry Grid.Column="1"
                    x:Name="BoolAliasEntry"
+                   Text="{Binding BoolRegisterAddress}"
                    Placeholder="Alias" />
 
             <CheckBox Grid.Column="2"
-                      IsChecked="False"
-                      x:Name="BoolWriteCheckBox" />
+                      IsChecked="{Binding BoolValue}"
+                      x:Name="BoolWriteCheckBox"/>
 
             <Button Grid.Column="3"
                     Text="Write"
-                    x:Name="BoolWriteButton" />
+                    x:Name="BoolWriteButton"
+                    Command="{Binding WriteBoolCommand}"/>
 
             <BoxView Grid.Column="4"
                      x:Name="BoolWriteFeedbackBoxView"
