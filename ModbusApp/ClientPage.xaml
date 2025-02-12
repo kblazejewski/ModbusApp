@@ -2,15 +2,15 @@
              xmlns:x="http://schemas.microsoft.com/winfx/2009/xaml"
              xmlns:vm="clr-namespace:ModbusApp.ViewModels"
              x:Class="ModbusApp.ClientPage">
-    
+
     <ContentPage.BindingContext>
         <vm:ClientViewModel />
     </ContentPage.BindingContext>
-    
+
     <Grid RowDefinitions="Auto, Auto, Auto, Auto, Auto, *"
           ColumnDefinitions="*"
           Padding="10">
-        
+
         <Grid Grid.Row="0"
               ColumnDefinitions="0.3*, *, *, *, *, 0.3*"
               ColumnSpacing="5"
@@ -30,7 +30,7 @@
             </Picker>
 
             <!-- IP Address Entry -->
-            <Entry Grid.Column="1" 
+            <Entry Grid.Column="1"
                    x:Name="IpEntry"
                    Text="{Binding IpAddress}"
                    Placeholder="Enter IP Address"
@@ -38,26 +38,37 @@
 
             <!-- Port Entry -->
             <Entry Grid.Column="2"
-                   x:Name="PortEntry" 
+                   x:Name="PortEntry"
                    Text="{Binding Port}"
-                   Placeholder="Enter Port" 
+                   Placeholder="Enter Port"
                    Keyboard="Numeric"
                    HorizontalOptions="Fill" />
 
             <!-- Connect Button -->
-            <Button Grid.Column="3" 
-                    Text="Connect"
-                    Command="{Binding ConnectCommand}"
+            <Button Grid.Column="3"
+                    Text="{Binding ConnectButtonText}"
+                    Command="{Binding ToggleConnectionCommand}"
                     HorizontalOptions="Fill" />
 
             <!-- Status Label -->
-            <Label Grid.Column="4" 
-                   x:Name="StatusLabel" 
+            <Label Grid.Column="4"
+                   x:Name="StatusLabel"
                    Text="{Binding ConnectionStatus}"
                    TextColor="Red"
-                   HorizontalOptions="Fill" 
-                   VerticalOptions="Center" 
-                   HorizontalTextAlignment="Center" />
+                   HorizontalOptions="Fill"
+                   VerticalOptions="Center"
+                   HorizontalTextAlignment="Center">
+
+                <Label.Triggers>
+                    <DataTrigger TargetType="Label" Binding="{Binding ConnectionStatus}" Value="Connected">
+                        <Setter Property="TextColor" Value="Green" />
+                    </DataTrigger>
+                    <DataTrigger TargetType="Label" Binding="{Binding ConnectionStatus}" Value="Connection Failed">
+                        <Setter Property="TextColor" Value="Orange" />
+                    </DataTrigger>
+                </Label.Triggers>
+
+            </Label>
 
             <Picker Grid.Column="5"
                     x:Name="AliasLenghtPicker"
@@ -101,12 +112,12 @@
 
             <CheckBox Grid.Column="2"
                       IsChecked="{Binding BoolValue}"
-                      x:Name="BoolWriteCheckBox"/>
+                      x:Name="BoolWriteCheckBox" />
 
             <Button Grid.Column="3"
                     Text="Write"
                     x:Name="BoolWriteButton"
-                    Command="{Binding WriteBoolCommand}"/>
+                    Command="{Binding WriteBoolCommand}" />
 
             <BoxView Grid.Column="4"
                      x:Name="BoolWriteFeedbackBoxView"
@@ -125,26 +136,60 @@
               VerticalOptions="Start">
 
             <Label Grid.Column="0"
-                   Text="Integers"
+                   Text="Integer"
                    VerticalOptions="Center"
                    HorizontalOptions="Start" />
 
             <Entry Grid.Column="1"
                    x:Name="IntegersAliasEntry"
-                   Placeholder="Alias" />
+                   Placeholder="Alias"
+                   Text="{Binding IntegerRegisterAddress}"/>
 
             <Entry Grid.Column="2"
-                   x:Name="IntegersWriteEntry" />
+                   x:Name="IntegersWriteEntry"
+                   Text="{Binding IntegerValue}"/>
 
             <Button Grid.Column="3"
                     Text="Write"
-                    x:Name="IntegersWriteButton" />
+                    x:Name="IntegersWriteButton"
+                    Command="{Binding WriteIntegerCommand}"/>
 
             <Border Grid.Column="4">
                 <Label Text="Feedback Value"
-                       x:Name="IntegersWriteFeedbackLabel" 
+                       x:Name="IntegersWriteFeedbackLabel"
                        VerticalOptions="Center"
-                       HorizontalOptions="Center"/>
+                       HorizontalOptions="Center" />
+            </Border>
+        </Grid>
+
+        <Grid Grid.Row="4"
+              ColumnDefinitions="*, *, *, *, *"
+              ColumnSpacing="5"
+              Padding="5"
+              HorizontalOptions="Fill"
+              VerticalOptions="Start">
+
+            <Label Grid.Column="0"
+                   Text="Float"
+                   VerticalOptions="Center"
+                   HorizontalOptions="Start" />
+
+            <Entry Grid.Column="1"
+                   x:Name="FloatAliasEntry"
+                   Placeholder="Alias" />
+
+            <Entry Grid.Column="2"
+                   x:Name="FloatWriteEntry" />
+
+            <Button Grid.Column="3"
+                    Text="Write"
+                    x:Name="FloatWriteButton" />
+
+            <Border Grid.Column="4">
+                <Label Text="Feedback Value"
+                       x:Name="FloatWriteFeedbackLabel"
+                       VerticalOptions="Center"
+                       HorizontalOptions="Center" />
             </Border>
         </Grid>
 

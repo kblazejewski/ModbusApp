@@ -7,6 +7,8 @@ public class ModbusClient
 {
     private readonly ModbusTcpClient _modbusClient = new();
     private bool _isConnected;
+    
+    public bool IsConnected => _isConnected;
 
     public async Task<bool> ConnectAsync(string ipAddress, int port)
     {
