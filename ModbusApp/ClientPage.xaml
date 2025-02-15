@@ -7,190 +7,37 @@
         <vm:ClientViewModel />
     </ContentPage.BindingContext>
 
-    <Grid RowDefinitions="Auto, Auto, Auto, Auto, Auto, *"
+    <Grid RowDefinitions="Auto, Auto, Auto"
           ColumnDefinitions="*"
           Padding="10">
 
-        <Grid Grid.Row="0"
-              ColumnDefinitions="0.3*, *, *, *, *, 0.3*"
-              ColumnSpacing="5"
-              Padding="5"
-              HorizontalOptions="FillAndExpand"
-              VerticalOptions="Start">
-
-
-            <!-- Connection Type Picker (TCP/RTU) -->
-            <Picker Grid.Column="0"
-                    x:Name="ConnectionPicker"
-                    HorizontalOptions="FillAndExpand"
-                    SelectedItem="TCP">
-                <Picker.Items>
-                    <x:String>TCP</x:String>
-                </Picker.Items>
-            </Picker>
-
-            <!-- IP Address Entry -->
-            <Entry Grid.Column="1"
-                   x:Name="IpEntry"
-                   Text="{Binding IpAddress}"
-                   Placeholder="Enter IP Address"
-                   HorizontalOptions="FillAndExpand" />
-
-            <!-- Port Entry -->
-            <Entry Grid.Column="2"
-                   x:Name="PortEntry"
-                   Text="{Binding Port}"
-                   Placeholder="Enter Port"
-                   Keyboard="Numeric"
-                   HorizontalOptions="Fill" />
-
-            <!-- Connect Button -->
-            <Button Grid.Column="3"
-                    Text="{Binding ConnectButtonText}"
-                    Command="{Binding ToggleConnectionCommand}"
-                    HorizontalOptions="Fill" />
-
-            <!-- Status Label -->
-            <Label Grid.Column="4"
-                   x:Name="StatusLabel"
-                   Text="{Binding ConnectionStatus}"
-                   TextColor="Red"
-                   HorizontalOptions="Fill"
-                   VerticalOptions="Center"
-                   HorizontalTextAlignment="Center">
-
-                <Label.Triggers>
-                    <DataTrigger TargetType="Label" Binding="{Binding ConnectionStatus}" Value="Connected">
-                        <Setter Property="TextColor" Value="Green" />
-                    </DataTrigger>
-                    <DataTrigger TargetType="Label" Binding="{Binding ConnectionStatus}" Value="Connection Failed">
-                        <Setter Property="TextColor" Value="Orange" />
-                    </DataTrigger>
-                </Label.Triggers>
-
-            </Label>
-
-            <Picker Grid.Column="5"
-                    x:Name="AliasLenghtPicker"
-                    HorizontalOptions="Fill">
-                <Picker.Items>
-                    <x:String>5-digits</x:String>
-                    <x:String>6-digits</x:String>
-                </Picker.Items>
-            </Picker>
-
+        <!-- Górna część: Konfiguracja połączenia -->
+        <Border Grid.Row="0" Margin="10">
+            <Grid ColumnDefinitions="*,*,*,*,*" ColumnSpacing="5" Padding="15">
+                <Entry Grid.Column="0" Text="{Binding IpAddress}" Placeholder="IP Address" />
+                <Entry Grid.Column="1" Text="{Binding Port}" Placeholder="Port" Keyboard="Numeric" />
+                <Entry Grid.Column="2" Text="{Binding DeviceId}" Placeholder="Device ID" Keyboard="Numeric" />
+                <Button Grid.Column="3" Text="{Binding ConnectButtonText}" Command="{Binding ToggleConnectionCommand}" />
+                <Label Grid.Column="4" Text="{Binding ConnectionStatus}" HorizontalTextAlignment="Center" VerticalTextAlignment="Center" />
+            </Grid>
+        </Border>
+        
+        <!-- Środkowa część: Wpisywanie danych do rejestrów -->
+        <Grid Grid.Row="1" ColumnDefinitions="*,*,*,*,*" ColumnSpacing="5" Padding="5">
+            <Picker Grid.Column="0" ItemsSource="{Binding ModbusWriteFunctions}" SelectedItem="{Binding SelectedWriteFunction}" />
+            <Entry Grid.Column="1" Text="{Binding WriteAddress}" Placeholder="Register Address" Keyboard="Numeric" />
+            <Entry Grid.Column="2" Text="{Binding WriteValue}" Placeholder="Value" />
+            <Button Grid.Column="3" Text="Write" Command="{Binding WriteRegisterCommand}" />
+            <Label Grid.Column="4" Text="{Binding WriteFeedback}" />
         </Grid>
 
-        <Grid Grid.Row="1"
-              ColumnDefinitions="*"
-              HorizontalOptions="Fill"
-              VerticalOptions="Fill">
-
-            <Label Text="Write Values"
-                   HorizontalOptions="Center"
-                   VerticalOptions="Center"
-                   FontSize="24" />
-
-        </Grid>
-
-        <Grid Grid.Row="2"
-              ColumnDefinitions="*, *, *, *, *"
-              ColumnSpacing="5"
-              Padding="5"
-              HorizontalOptions="Fill"
-              VerticalOptions="Start">
-
-            <Label Grid.Column="0"
-                   Text="Bool"
-                   VerticalOptions="Center"
-                   HorizontalOptions="Start" />
-
-            <Entry Grid.Column="1"
-                   x:Name="BoolAliasEntry"
-                   Text="{Binding BoolRegisterAddress}"
-                   Placeholder="Alias" />
-
-            <CheckBox Grid.Column="2"
-                      IsChecked="{Binding BoolValue}"
-                      x:Name="BoolWriteCheckBox" />
-
-            <Button Grid.Column="3"
-                    Text="Write"
-                    x:Name="BoolWriteButton"
-                    Command="{Binding WriteBoolCommand}" />
-
-            <BoxView Grid.Column="4"
-                     x:Name="BoolWriteFeedbackBoxView"
-                     CornerRadius="3"
-                     WidthRequest="35"
-                     HeightRequest="35"
-                     BackgroundColor="Transparent"
-                     Color="Red" />
-        </Grid>
-
-        <Grid Grid.Row="3"
-              ColumnDefinitions="*, *, *, *, *"
-              ColumnSpacing="5"
-              Padding="5"
-              HorizontalOptions="Fill"
-              VerticalOptions="Start">
-
-            <Label Grid.Column="0"
-                   Text="Integer"
-                   VerticalOptions="Center"
-                   HorizontalOptions="Start" />
-
-            <Entry Grid.Column="1"
-                   x:Name="IntegersAliasEntry"
-                   Placeholder="Alias"
-                   Text="{Binding IntegerRegisterAddress}"/>
-
-            <Entry Grid.Column="2"
-                   x:Name="IntegersWriteEntry"
-                   Text="{Binding IntegerValue}"/>
-
-            <Button Grid.Column="3"
-                    Text="Write"
-                    x:Name="IntegersWriteButton"
-                    Command="{Binding WriteIntegerCommand}"/>
-
-            <Border Grid.Column="4">
-                <Label Text="Feedback Value"
-                       x:Name="IntegersWriteFeedbackLabel"
-                       VerticalOptions="Center"
-                       HorizontalOptions="Center" />
-            </Border>
-        </Grid>
-
-        <Grid Grid.Row="4"
-              ColumnDefinitions="*, *, *, *, *"
-              ColumnSpacing="5"
-              Padding="5"
-              HorizontalOptions="Fill"
-              VerticalOptions="Start">
-
-            <Label Grid.Column="0"
-                   Text="Float"
-                   VerticalOptions="Center"
-                   HorizontalOptions="Start" />
-
-            <Entry Grid.Column="1"
-                   x:Name="FloatAliasEntry"
-                   Placeholder="Alias" />
-
-            <Entry Grid.Column="2"
-                   x:Name="FloatWriteEntry" />
-
-            <Button Grid.Column="3"
-                    Text="Write"
-                    x:Name="FloatWriteButton" />
-
-            <Border Grid.Column="4">
-                <Label Text="Feedback Value"
-                       x:Name="FloatWriteFeedbackLabel"
-                       VerticalOptions="Center"
-                       HorizontalOptions="Center" />
-            </Border>
+        <!-- Dolna część: Odczyt danych z rejestrów -->
+        <Grid Grid.Row="2" ColumnDefinitions="*,*,*,*,*" ColumnSpacing="5" Padding="5">
+            <Picker Grid.Column="0" ItemsSource="{Binding ModbusReadFunctions}" SelectedItem="{Binding SelectedReadFunction}" />
+            <Entry Grid.Column="1" Text="{Binding ReadRegisterAddress}" Placeholder="Register Address" Keyboard="Numeric" />
+            <Button Grid.Column="2" Text="Read" Command="{Binding ReadRegisterCommand}" />
+            <Label Grid.Column="3" Text="{Binding ReadValue}" />
+            <Label Grid.Column="4" Text="{Binding ReadFeedback}" />
         </Grid>
 
     </Grid>

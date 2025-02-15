@@ -8,19 +8,38 @@ namespace ModbusApp.ViewModels;
 public partial class ClientViewModel : ObservableObject
 {
     private readonly ModbusClient _modbusClient;
-    private CancellationTokenSource _connectionMonitorCancellationTokenSource;
 
-    [ObservableProperty] private string ipAddress = "127.0.0.1";
-    [ObservableProperty] private int port = 502;
-    [ObservableProperty] private byte deviceId = 1;
-    [ObservableProperty] private bool isConnected;
-    [ObservableProperty] private string connectionStatus = "Disconnected";
-    [ObservableProperty] private bool boolValue;
-    [ObservableProperty] private int boolRegisterAddress = 0;
-    [ObservableProperty] private string integerValue = "";
-    [ObservableProperty] private int integerRegisterAddress = 0;
+    [ObservableProperty] private string _ipAddress = "127.0.0.1";
+    [ObservableProperty] private int _port = 502;
+    [ObservableProperty] private byte _deviceId = 1;
+    [ObservableProperty] private string _connectionStatus = "Disconnected";
+    [ObservableProperty] private int _registerAddress = 0;
+    [ObservableProperty] private int _registerCount = 1;
+    [ObservableProperty] private string _writeValue = "";
+    [ObservableProperty] private string _feedback = "";
+    [ObservableProperty] private string _writeAddress = "";
 
-    public string ConnectButtonText => IsConnected ? "Disconnect" : "Connect";
+
+    [ObservableProperty] private List<string> _modbusReadFunctions =
+    [
+        "Read Coils (FC01)",
+        "Read Discrete Inputs (FC02)",
+        "Read Holding Registers (FC03)",
+        "Read Input Registers (FC04)",
+    ];
+
+    [ObservableProperty] private List<string> _modbusWriteFunctions =
+    [
+        "Write Single Coil (FC05)",
+        "Write Single Register (FC06)",
+        // "Write Multiple Coils (FC15)",
+        // "Write Multiple Registers (FC16)",
+    ];
+
+    [ObservableProperty] private string _selectedWriteFunction;
+    [ObservableProperty] private string _selectedReadFunction;
+
+    public string ConnectButtonText => _modbusClient.IsConnected ? "Disconnect" : "Connect";
 
     public ClientViewModel()
     {
@@ -28,96 +47,126 @@ public partial class ClientViewModel : ObservableObject
     }
 
     [RelayCommand]
-    public async Task ToggleConnectionAsync()
+    private async Task ToggleConnectionAsync()
     {
-        if (IsConnected) // Używamy getter'a
+        if (_modbusClient.IsConnected)
         {
-            await DisconnectAsync();
+            await _modbusClient.DisconnectAsync();
+            ConnectionStatus = "Disconnected";
         }
         else
         {
-            await ConnectAsync();
+            var success = await _modbusClient.ConnectAsync(IpAddress, Port);
+            ConnectionStatus = success ? "Connected" : "Connection Failed";
         }
+
+        OnPropertyChanged(nameof(ConnectButtonText));
     }
 
-    // Metoda do łączenia
-    public async Task ConnectAsync()
+    [RelayCommand]
+    private async Task WriteRegisterAsync()
     {
+        if (!_modbusClient.IsConnected)
+        {
+            Feedback = "Client is not connected.";
+            return;
+        }
+
         try
         {
-            var success = await _modbusClient.ConnectAsync(IpAddress, Port);
-            if (success)
+            // Parsowanie adresu rejestru
+            if (!int.TryParse(WriteAddress, out var registerAddress))
             {
-                ConnectionStatus = "Connected";
-                OnPropertyChanged(nameof(ConnectButtonText));
-
-                // Rozpoczynamy monitorowanie połączenia po udanym połączeniu
-                StartConnectionMonitor();
+                Feedback = "Invalid register address. Please enter a valid number.";
+                return;
             }
-            else
+
+            switch (SelectedWriteFunction)
             {
-                ConnectionStatus = "Connection Failed";
-                OnPropertyChanged(nameof(ConnectButtonText));
+                case "Write Single Coil (FC05)":
+                    // Obsługa wpisania 1/0 jako true/false
+                    if (WriteValue is "1" or "0")
+                    {
+                        var writeBoolValue = WriteValue == "1";
+                        await _modbusClient.WriteSingleCoilAsync(DeviceId, registerAddress, writeBoolValue);
+                        Feedback = "Write Successful";
+                    }
+                    else if (bool.TryParse(WriteValue, out var writeBoolValue))
+                    {
+                        await _modbusClient.WriteSingleCoilAsync(DeviceId, registerAddress, writeBoolValue);
+                        Feedback = "Write Successful";
+                    }
+                    else
+                    {
+                        Feedback = "Invalid value for Write Single Coil. Please enter 'true', 'false', '1', or '0'.";
+                    }
+
+                    break;
+
+                case "Write Single Register (FC06)":
+                    if (ushort.TryParse(WriteValue, out var writeShortValue))
+                    {
+                        await _modbusClient.WriteSingleRegisterAsync(DeviceId, registerAddress, writeShortValue);
+                        Feedback = "Write Successful";
+                    }
+                    else
+                    {
+                        Feedback = "Invalid value for Write Single Register. Please enter a valid number.";
+                    }
+
+                    break;
+
+                // case "Write Multiple Coils (FC15)":
+                //     var coils = WriteValue
+                //         .Split(','); // Assuming coils are separated by commas, e.g., "true,false,true"
+                //     var coilValues = coils.Select(c => bool.TryParse(c.Trim(), out var coil) ? coil : false).ToArray();
+                //     if (coilValues.Length > 0)
+                //     {
+                //         await _modbusClient.WriteMultipleRegistersAsync(DeviceId, registerAddress,
+                //             coilValues.Select(b => b ? (ushort)1 : (ushort)0).ToArray());
+                //         Feedback = "Write Successful";
+                //     }
+                //     else
+                //     {
+                //         Feedback =
+                //             "Invalid value for Write Multiple Coils. Please provide a comma-separated list of 'true'/'false'.";
+                //     }
+                //
+                //     break;
+                //
+                // case "Write Multiple Registers (FC16)":
+                //     var values = WriteValue.Split(','); // Assuming numbers are separated by commas, e.g., "100,200,300"
+                //     var ushortValues = values.Select(v => ushort.TryParse(v.Trim(), out var reg) ? reg : (ushort)0)
+                //         .ToArray();
+                //     if (ushortValues.Length > 0)
+                //     {
+                //         await _modbusClient.WriteMultipleRegistersAsync(DeviceId, registerAddress, ushortValues);
+                //         Feedback = "Write Successful";
+                //     }
+                //     else
+                //     {
+                //         Feedback =
+                //             "Invalid value for Write Multiple Registers. Please provide a comma-separated list of numbers.";
+                //     }
+                //
+                //     break;
+
+                default:
+                    Feedback = "Invalid Write Function selected.";
+                    break;
             }
         }
-        catch
+        catch (Exception ex)
         {
-            ConnectionStatus = "Connection Failed";
-            OnPropertyChanged(nameof(ConnectButtonText));
+            Feedback = $"Write operation failed: {ex.Message}";
         }
-    }
-
-    // Metoda do rozłączania
-    public async Task DisconnectAsync()
-    {
-        await _modbusClient.DisconnectAsync();
-        ConnectionStatus = "Disconnected";
-        IsConnected = false;
-        OnPropertyChanged(nameof(ConnectButtonText)); // Zaktualizowanie tekstu przycisku
-
-        // Zatrzymanie monitorowania po rozłączeniu
-        _connectionMonitorCancellationTokenSource?.Cancel();
-    }
-
-    // Metoda monitorująca połączenie
-    private void StartConnectionMonitor()
-    {
-        // Tworzymy nowy CancellationTokenSource
-        _connectionMonitorCancellationTokenSource = new CancellationTokenSource();
-        var token = _connectionMonitorCancellationTokenSource.Token;
-
-        // Używamy Task do monitorowania połączenia w tle
-        Task.Run(async () =>
-        {
-            while (!_modbusClient.IsConnected)
-            {
-                await Task.Delay(2000, token); // Sprawdzenie co 2 sekundy
-
-                if (!_modbusClient.IsConnected) // Sprawdzamy, czy połączenie zostało utracone
-                {
-                    ConnectionStatus = "Lost Connection";
-                    IsConnected = false;
-                    OnPropertyChanged(nameof(ConnectButtonText)); // Odświeżenie statusu przycisku
-                    break; // Zatrzymujemy monitorowanie po utracie połączenia
-                }
-            }
-        }, token);
     }
 
     [RelayCommand]
-    public async Task WriteBoolAsync()
+    public async Task ReadRegisterAsync()
     {
-        if (!IsConnected) return;
-        await _modbusClient.WriteBoolAsync(DeviceId, boolRegisterAddress, BoolValue);
-    }
-
-    [RelayCommand]
-    public async Task WriteIntegerAsync()
-    {
-        if (!IsConnected) return;
-        if (short.TryParse(IntegerValue, out short value))
-        {
-            await _modbusClient.WriteIntegerAsync(DeviceId, integerRegisterAddress, value);
-        }
+        if (!_modbusClient.IsConnected) return;
+        var values = await _modbusClient.ReadHoldingRegistersAsync(DeviceId, RegisterAddress, RegisterCount);
+        Feedback = values != null ? string.Join(", ", values) : "Read Failed";
     }
 }

@@ -14,7 +14,7 @@ public class ModbusClient
     {
         try
         {
-            await Task.Run(() => _modbusClient.Connect(new IPEndPoint(IPAddress.Parse(ipAddress), port)));
+            await Task.Run(() => _modbusClient.Connect(new IPEndPoint(IPAddress.Parse(ipAddress), port), ModbusEndianness.BigEndian));
             _isConnected = true;
             return true;
         }
@@ -42,82 +42,46 @@ public class ModbusClient
         if (!_isConnected)
             throw new InvalidOperationException("Modbus client is not connected.");
     }
-
-    public async Task<ushort[]> ReadHoldingRegistersAsync(byte unitIdentifier, int startingAddress, int count)
+    
+    public async Task<ushort[]> ReadHoldingRegistersAsync(byte unitId, int address, int count)
     {
         EnsureConnected();
-        return await Task.Run(() =>
-            _modbusClient.ReadHoldingRegisters<ushort>(unitIdentifier, startingAddress, count).ToArray());
+        return await Task.Run(() => _modbusClient.ReadHoldingRegisters<ushort>(unitId, address, count).ToArray());
     }
 
-    public async Task<short[]> ReadSignedIntegersAsync(byte unitIdentifier, int startingAddress, int count)
+    public async Task WriteMultipleRegistersAsync(byte unitId, int address, ushort[] values)
     {
         EnsureConnected();
-        return await Task.Run(() =>
-            _modbusClient.ReadHoldingRegisters<short>(unitIdentifier, startingAddress, count).ToArray());
+        await Task.Run(() => _modbusClient.WriteMultipleRegisters(unitId, address, values));
     }
 
-    public async Task<float[]> ReadFloatsAsync(byte unitIdentifier, int startingAddress, int count)
+    public async Task<byte[]> ReadCoilsAsync(byte unitId, int address, int count)
     {
         EnsureConnected();
-        return await Task.Run(() =>
-            _modbusClient.ReadHoldingRegisters<float>(unitIdentifier, startingAddress, count).ToArray());
+        return await Task.Run(() => _modbusClient.ReadCoils(unitId, address, count).ToArray());
     }
 
-    public async Task<bool[]> ReadBoolAsync(byte unitIdentifier, int startingAddress, int count)
+    public async Task<byte[]> ReadDiscreteInputsAsync(byte unitId, int address, int count)
     {
         EnsureConnected();
-        return await Task.Run(() =>
-        {
-            var bytes = _modbusClient.ReadCoils(unitIdentifier, startingAddress, count).ToArray();
-            return bytes.Select(b => b > 0).ToArray();
-        });
+        return await Task.Run(() => _modbusClient.ReadDiscreteInputs(unitId, address, count).ToArray());
     }
 
-    public async Task WriteIntegerAsync(byte unitIdentifier, int startingAddress, short value)
+    public async Task<ushort[]> ReadInputRegistersAsync(byte unitId, int address, int count)
     {
         EnsureConnected();
-        await Task.Run(() => _modbusClient.WriteSingleRegister(unitIdentifier, startingAddress, value));
+        return await Task.Run(() => _modbusClient.ReadInputRegisters<ushort>(unitId, address, count).ToArray());
     }
 
-    public async Task WriteMultipleIntegersAsync(byte unitIdentifier, int startingAddress, short[] values)
+    public async Task WriteSingleCoilAsync(byte unitId, int address, bool value)
     {
         EnsureConnected();
-        await Task.Run(() => _modbusClient.WriteMultipleRegisters(unitIdentifier, startingAddress, values));
+        await Task.Run(() => _modbusClient.WriteSingleCoil(unitId, address, value));
     }
 
-    public async Task WriteFloatAsync(byte unitIdentifier, int startingAddress, float value)
+    public async Task WriteSingleRegisterAsync(byte unitId, int address, ushort value)
     {
         EnsureConnected();
-        var bytes = BitConverter.GetBytes(value);
-        var registers = new ushort[2]
-        {
-            BitConverter.ToUInt16(bytes, 0),
-            BitConverter.ToUInt16(bytes, 2)
-        };
-        await Task.Run(() => _modbusClient.WriteMultipleRegisters(unitIdentifier, startingAddress, registers));
-    }
-
-    public async Task WriteMultipleFloatsAsync(byte unitIdentifier, int startingAddress, float[] values)
-    {
-        EnsureConnected();
-        var registers = values.SelectMany(v =>
-        {
-            var bytes = BitConverter.GetBytes(v);
-            return new ushort[] { BitConverter.ToUInt16(bytes, 0), BitConverter.ToUInt16(bytes, 2) };
-        }).ToArray();
-        await Task.Run(() => _modbusClient.WriteMultipleRegisters(unitIdentifier, startingAddress, registers));
-    }
-
-    public async Task WriteBoolAsync(byte unitIdentifier, int startingAddress, bool value)
-    {
-        EnsureConnected();
-        await Task.Run(() => _modbusClient.WriteSingleCoil(unitIdentifier, startingAddress, value));
-    }
-
-    public async Task WriteMultipleBoolsAsync(byte unitIdentifier, int startingAddress, bool[] values)
-    {
-        EnsureConnected();
-        await Task.Run(() => _modbusClient.WriteMultipleCoils(unitIdentifier, startingAddress, values));
+        await Task.Run(() => _modbusClient.WriteSingleRegister(unitId, address, value));
     }
 }
