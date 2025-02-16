@@ -66,7 +66,7 @@ public partial class ClientViewModel : ObservableObject
     {
         if (!_modbusClient.IsConnected)
         {
-            Feedback = "Client is not connected.";
+            WriteFeedback = "Client is not connected.";
             return;
         }
 
