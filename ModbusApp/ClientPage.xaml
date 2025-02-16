@@ -10,35 +10,56 @@
     <Grid RowDefinitions="Auto, Auto, Auto"
           ColumnDefinitions="*"
           Padding="10">
+        
+        <StackLayout Grid.Row="0" Padding="10">
+            <Label Text="Connection Parameters" FontSize="Medium" FontAttributes="Bold" HorizontalOptions="Center"
+                   Margin="0,0,0,10" />
 
-        <!-- Górna część: Konfiguracja połączenia -->
-        <Border Grid.Row="0" Margin="10">
-            <Grid ColumnDefinitions="*,*,*,*,*" ColumnSpacing="5" Padding="15">
+            <Grid ColumnDefinitions="*,*,*,*,*" ColumnSpacing="5" Padding="5">
                 <Entry Grid.Column="0" Text="{Binding IpAddress}" Placeholder="IP Address" />
                 <Entry Grid.Column="1" Text="{Binding Port}" Placeholder="Port" Keyboard="Numeric" />
                 <Entry Grid.Column="2" Text="{Binding DeviceId}" Placeholder="Device ID" Keyboard="Numeric" />
                 <Button Grid.Column="3" Text="{Binding ConnectButtonText}" Command="{Binding ToggleConnectionCommand}" />
-                <Label Grid.Column="4" Text="{Binding ConnectionStatus}" HorizontalTextAlignment="Center" VerticalTextAlignment="Center" />
+                <Border Grid.Column="4" BackgroundColor="Transparent">
+                    <Border.StrokeShape>
+                        <RoundRectangle CornerRadius="4" />
+                    </Border.StrokeShape>
+                    <Label Text="{Binding ConnectionStatus}" HorizontalTextAlignment="Center"
+                           VerticalTextAlignment="Center" />
+                </Border>
             </Grid>
-        </Border>
+        </StackLayout>
         
-        <!-- Środkowa część: Wpisywanie danych do rejestrów -->
-        <Grid Grid.Row="1" ColumnDefinitions="*,*,*,*,*" ColumnSpacing="5" Padding="5">
-            <Picker Grid.Column="0" ItemsSource="{Binding ModbusWriteFunctions}" SelectedItem="{Binding SelectedWriteFunction}" />
-            <Entry Grid.Column="1" Text="{Binding WriteAddress}" Placeholder="Register Address" Keyboard="Numeric" />
-            <Entry Grid.Column="2" Text="{Binding WriteValue}" Placeholder="Value" />
-            <Button Grid.Column="3" Text="Write" Command="{Binding WriteRegisterCommand}" />
-            <Label Grid.Column="4" Text="{Binding WriteFeedback}" />
-        </Grid>
-
-        <!-- Dolna część: Odczyt danych z rejestrów -->
-        <Grid Grid.Row="2" ColumnDefinitions="*,*,*,*,*" ColumnSpacing="5" Padding="5">
-            <Picker Grid.Column="0" ItemsSource="{Binding ModbusReadFunctions}" SelectedItem="{Binding SelectedReadFunction}" />
-            <Entry Grid.Column="1" Text="{Binding ReadRegisterAddress}" Placeholder="Register Address" Keyboard="Numeric" />
-            <Button Grid.Column="2" Text="Read" Command="{Binding ReadRegisterCommand}" />
-            <Label Grid.Column="3" Text="{Binding ReadValue}" />
-            <Label Grid.Column="4" Text="{Binding ReadFeedback}" />
-        </Grid>
-
+        <StackLayout Grid.Row="1" Padding="10">
+            <Label Text="Write Registers" FontSize="Medium" FontAttributes="Bold" HorizontalOptions="Center"
+                   Margin="0,0,0,10" />
+            <Grid ColumnDefinitions="*,*,*,*,*" ColumnSpacing="5" Padding="5">
+                <Picker Grid.Column="0" ItemsSource="{Binding ModbusWriteFunctions}"
+                        SelectedItem="{Binding SelectedWriteFunction}" />
+                <Entry Grid.Column="1" Text="{Binding WriteAddress}" Placeholder="Register Address" Keyboard="Numeric" />
+                <Entry Grid.Column="2" Text="{Binding WriteValue}" Placeholder="Value" HorizontalTextAlignment="Center" />
+                <Button Grid.Column="3" Text="Write" Command="{Binding WriteRegisterCommand}" />
+                <Label Grid.Column="4" Text="{Binding WriteFeedback}" />
+            </Grid>
+        </StackLayout>
+        
+        <StackLayout Grid.Row="2" Padding="10">
+            <Label Text="Read Registers" FontSize="Medium" FontAttributes="Bold" HorizontalOptions="Center"
+                   Margin="0,0,0,10" />
+            <Grid ColumnDefinitions="*,*,*,*,*" ColumnSpacing="5" Padding="5">
+                <Picker Grid.Column="0" ItemsSource="{Binding ModbusReadFunctions}"
+                        SelectedItem="{Binding SelectedReadFunction}" />
+                <Entry Grid.Column="1" Text="{Binding ReadAddress}" Placeholder="Register Address" Keyboard="Numeric" />
+                <Border Grid.Column="2" BackgroundColor="Transparent">
+                    <Border.StrokeShape>
+                        <RoundRectangle CornerRadius="4" />
+                    </Border.StrokeShape>
+                    <Label Text="{Binding ReadValue}" VerticalTextAlignment="Center" HorizontalTextAlignment="Center" />
+                </Border>
+                <Button Grid.Column="3" Text="Read" Command="{Binding ReadRegisterCommand}" />
+                <Label Grid.Column="4" Text="{Binding ReadFeedback}" />
+            </Grid>
+        </StackLayout>
+        
     </Grid>
 </ContentPage>

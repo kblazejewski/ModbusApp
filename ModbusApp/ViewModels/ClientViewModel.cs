@@ -1,7 +1,6 @@
 using CommunityToolkit.Mvvm.ComponentModel;
 using CommunityToolkit.Mvvm.Input;
 using ModbusApp.Models;
-using System.Threading.Tasks;
 
 namespace ModbusApp.ViewModels;
 
@@ -13,13 +12,14 @@ public partial class ClientViewModel : ObservableObject
     [ObservableProperty] private int _port = 502;
     [ObservableProperty] private byte _deviceId = 1;
     [ObservableProperty] private string _connectionStatus = "Disconnected";
-    [ObservableProperty] private int _registerAddress = 0;
-    [ObservableProperty] private int _registerCount = 1;
     [ObservableProperty] private string _writeValue = "";
     [ObservableProperty] private string _feedback = "";
     [ObservableProperty] private string _writeAddress = "";
-
-
+    [ObservableProperty] private string _readAddress = "";
+    [ObservableProperty] private string _readValue = "";
+    [ObservableProperty] private string _readFeedback = "";
+    [ObservableProperty] private string _writeFeedback = "";
+    
     [ObservableProperty] private List<string> _modbusReadFunctions =
     [
         "Read Coils (FC01)",
@@ -32,8 +32,6 @@ public partial class ClientViewModel : ObservableObject
     [
         "Write Single Coil (FC05)",
         "Write Single Register (FC06)",
-        // "Write Multiple Coils (FC15)",
-        // "Write Multiple Registers (FC16)",
     ];
 
     [ObservableProperty] private string _selectedWriteFunction;
@@ -74,31 +72,29 @@ public partial class ClientViewModel : ObservableObject
 
         try
         {
-            // Parsowanie adresu rejestru
             if (!int.TryParse(WriteAddress, out var registerAddress))
             {
-                Feedback = "Invalid register address. Please enter a valid number.";
+                WriteFeedback = "Invalid register address. Please enter a valid number.";
                 return;
             }
 
             switch (SelectedWriteFunction)
             {
                 case "Write Single Coil (FC05)":
-                    // Obsługa wpisania 1/0 jako true/false
                     if (WriteValue is "1" or "0")
                     {
                         var writeBoolValue = WriteValue == "1";
                         await _modbusClient.WriteSingleCoilAsync(DeviceId, registerAddress, writeBoolValue);
-                        Feedback = "Write Successful";
+                        WriteFeedback = "Write Successful";
                     }
                     else if (bool.TryParse(WriteValue, out var writeBoolValue))
                     {
                         await _modbusClient.WriteSingleCoilAsync(DeviceId, registerAddress, writeBoolValue);
-                        Feedback = "Write Successful";
+                        WriteFeedback = "Write Successful";
                     }
                     else
                     {
-                        Feedback = "Invalid value for Write Single Coil. Please enter 'true', 'false', '1', or '0'.";
+                        WriteFeedback = "Invalid value for Write Single Coil. Please enter 'true', 'false', '1', or '0'.";
                     }
 
                     break;
@@ -107,11 +103,11 @@ public partial class ClientViewModel : ObservableObject
                     if (ushort.TryParse(WriteValue, out var writeShortValue))
                     {
                         await _modbusClient.WriteSingleRegisterAsync(DeviceId, registerAddress, writeShortValue);
-                        Feedback = "Write Successful";
+                        WriteFeedback = "Write Successful";
                     }
                     else
                     {
-                        Feedback = "Invalid value for Write Single Register. Please enter a valid number.";
+                        WriteFeedback = "Invalid value for Write Single Register. Please enter a valid number.";
                     }
 
                     break;
@@ -158,15 +154,62 @@ public partial class ClientViewModel : ObservableObject
         }
         catch (Exception ex)
         {
-            Feedback = $"Write operation failed: {ex.Message}";
+            WriteFeedback = $"Write operation failed: {ex.Message}";
         }
     }
 
     [RelayCommand]
-    public async Task ReadRegisterAsync()
+    private async Task ReadRegisterAsync()
     {
-        if (!_modbusClient.IsConnected) return;
-        var values = await _modbusClient.ReadHoldingRegistersAsync(DeviceId, RegisterAddress, RegisterCount);
-        Feedback = values != null ? string.Join(", ", values) : "Read Failed";
+        if (!_modbusClient.IsConnected)
+        {
+            ReadFeedback = "Client is not connected.";
+            return;
+        }
+
+        const int registerCount = 1;
+        try
+        {
+            if (!int.TryParse(ReadAddress, out var registerAddress))
+            {
+                ReadFeedback = "Invalid register address. Please enter a valid number.";
+                return;
+            }
+
+            switch (SelectedReadFunction)
+            {
+                case "Read Coils (FC01)":
+                    var coils = await _modbusClient.ReadCoilsAsync(DeviceId, registerAddress, registerCount);
+                    ReadValue = string.Join(", ", coils.Select(c => c == 1 ? "1" : "0"));
+                    break;
+
+                case "Read Discrete Inputs (FC02)":
+                    var inputs = await _modbusClient.ReadDiscreteInputsAsync(DeviceId, registerAddress, registerCount);
+                    ReadValue = string.Join(", ", inputs.Select(i => i == 1 ? "1" : "0"));
+                    break;
+
+                case "Read Holding Registers (FC03)":
+                    var holdingValues =
+                        await _modbusClient.ReadHoldingRegistersAsync(DeviceId, registerAddress, registerCount);
+                    ReadValue = string.Join(", ", holdingValues);
+                    break;
+
+                case "Read Input Registers (FC04)":
+                    var inputValues =
+                        await _modbusClient.ReadInputRegistersAsync(DeviceId, registerAddress, registerCount);
+                    ReadValue = string.Join(", ", inputValues);
+                    break;
+
+                default:
+                    ReadFeedback = "Invalid Read Function selected.";
+                    return;
+            }
+
+            ReadFeedback = "Read Successful";
+        }
+        catch (Exception ex)
+        {
+            ReadFeedback = $"Read operation failed: {ex.Message}";
+        }
     }
 }
